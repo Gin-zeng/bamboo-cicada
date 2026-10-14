@@ -1,0 +1,15 @@
+# 操作系统/编辑器
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# 依赖与工具（本项目无构建步骤，vendor 为已提交的第三方库）
+node_modules/
+tools/
+*.log
+
+# 本地截图/临时产物
+shots/
+shots3/

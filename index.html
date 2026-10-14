@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>竹知了 · 3D 仿真游戏</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game-container">
+  <canvas id="scene"></canvas>
+  <div id="cam-box">
+    <video id="cam" playsinline muted></video>
+    <canvas id="cam-overlay"></canvas>
+    <span class="cam-label">👋 手势追踪</span>
+  </div>
+
+  <!-- 顶部 HUD -->
+  <header id="hud-top">
+    <div class="brand">🎋 竹知了 <span class="sub">3D 仿真</span></div>
+    <div class="btns">
+      <button id="btnCam" class="chip">📷 手势</button>
+      <button id="btnSound" class="chip on">🔊 声音开</button>
+    </div>
+  </header>
+
+  <!-- 计分面板 -->
+  <div id="score-panel">
+    <div class="score-item">
+      <span class="s-label">转速</span>
+      <span class="s-val" id="rpmVal">0</span><span class="s-unit">rpm</span>
+    </div>
+    <div class="score-item">
+      <span class="s-label">连续鸣叫</span>
+      <span class="s-val" id="chirpVal">0.0</span><span class="s-unit">s</span>
+    </div>
+    <div class="score-item">
+      <span class="s-label">得分</span>
+      <span class="s-val big" id="scoreVal">0</span>
+    </div>
+    <div class="score-item">
+      <span class="s-label">🏆 纪录</span>
+      <span class="s-val" id="bestVal">0</span><span class="s-unit">s</span>
+    </div>
+  </div>
+
+  <!-- 转速仪表 -->
+  <div id="gauge">
+    <div id="gauge-fill"></div>
+    <span id="gauge-label">转速</span>
+  </div>
+
+  <!-- 底部提示 -->
+  <footer id="hud-bottom">
+    <p id="hint">🖱️ 按住竹签来回搓 · 📱 摇一摇手机 · 📷 开启摄像头手势搓动</p>
+  </footer>
+
+  <!-- 开始遮罩 -->
+  <div id="overlay">
+    <div class="ov-box">
+      <div class="ov-emoji">🎋</div>
+      <h1>竹知了</h1>
+      <p class="ov-lead">搓动竹签，让竹片高速旋转，发出夏天的蝉鸣</p>
+      <div class="ov-tips">
+        <p>🖱️ 鼠标：按住竹签来回搓</p>
+        <p>📱 手机：单指搓动，或「摇一摇」</p>
+        <p>📷 摄像头：手掌来回搓动（可选）</p>
+      </div>
+      <button id="btnStart">开始玩 ▶</button>
+      <p class="ov-note">点击开始后开启声音体验更佳</p>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/three.min.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

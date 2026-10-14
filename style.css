@@ -1,0 +1,125 @@
+/* 竹知了 · 3D 仿真游戏 样式 */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;touch-action:none}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:#0f172a;color:#e2e8f0;
+  -webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none;
+}
+
+#game-container{position:fixed;inset:0;overflow:hidden}
+#scene{display:block;width:100%;height:100%}
+
+/* ---------- 摄像头画中画 ---------- */
+#cam-box{
+  position:absolute;right:16px;bottom:calc(76px + env(safe-area-inset-bottom));
+  width:180px;height:135px;z-index:20;display:none;
+  border-radius:14px;overflow:hidden;border:2px solid rgba(255,255,255,.28);
+  box-shadow:0 10px 28px rgba(0,0,0,.55);background:#000;
+  transform:scaleX(-1);
+}
+#cam-box.show{display:block}
+#cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#cam-overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cam-label{
+  position:absolute;top:6px;right:8px;font-size:11px;font-weight:700;color:#fff;
+  background:rgba(0,0,0,.55);padding:2px 8px;border-radius:99px;pointer-events:none;
+  transform:scaleX(-1);
+}
+
+/* ---------- 顶部 HUD ---------- */
+#hud-top{
+  position:absolute;top:0;left:0;right:0;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:calc(12px + env(safe-area-inset-top)) 16px 10px;
+  pointer-events:none;
+}
+.brand{font-size:20px;font-weight:800;letter-spacing:.5px;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.brand .sub{font-size:12px;font-weight:600;color:#94a3b8;margin-left:6px}
+.btns{display:flex;gap:8px;pointer-events:auto}
+.chip{
+  border:1px solid rgba(255,255,255,.18);background:rgba(15,23,42,.55);
+  color:#e2e8f0;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  font-size:13px;font-weight:600;padding:8px 14px;border-radius:99px;cursor:pointer;
+  transition:.2s;font-family:inherit;
+}
+.chip:active{transform:scale(.95)}
+.chip.on{background:rgba(16,185,129,.28);border-color:rgba(16,185,129,.6);color:#6ee7b7}
+.chip.off{background:rgba(239,68,68,.25);border-color:rgba(239,68,68,.55);color:#fca5a5}
+
+/* ---------- 计分面板 ---------- */
+#score-panel{
+  position:absolute;top:calc(58px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+  z-index:10;display:flex;gap:10px;pointer-events:none;
+}
+.score-item{
+  background:rgba(15,23,42,.55);border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border-radius:14px;padding:8px 14px;text-align:center;min-width:76px;
+}
+.s-label{display:block;font-size:11px;color:#94a3b8}
+.s-val{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.s-val.big{font-size:24px;color:#fbbf24}
+.s-unit{font-size:11px;color:#94a3b8;margin-left:2px}
+
+/* ---------- 转速仪表 ---------- */
+#gauge{
+  position:absolute;right:16px;bottom:calc(70px + env(safe-area-inset-bottom));
+  width:16px;height:200px;z-index:10;pointer-events:none;
+  background:rgba(15,23,42,.5);border:1px solid rgba(255,255,255,.14);border-radius:99px;
+  overflow:hidden;display:flex;align-items:flex-end;
+}
+#gauge-fill{
+  width:100%;height:0%;
+  background:linear-gradient(180deg,#f59e0b,#ef4444 60%,#ec4899);
+  transition:height .08s linear;border-radius:99px;
+}
+#gauge-label{
+  position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
+  font-size:9px;color:#fff;writing-mode:vertical-lr;letter-spacing:2px;opacity:.8;
+}
+
+/* ---------- 底部提示 ---------- */
+#hud-bottom{
+  position:absolute;bottom:0;left:0;right:0;z-index:10;
+  padding:10px 16px calc(12px + env(safe-area-inset-bottom));
+  text-align:center;pointer-events:none;
+}
+#hint{font-size:13px;color:#94a3b8;text-shadow:0 1px 6px rgba(0,0,0,.6);transition:opacity .3s}
+#hint.flash{color:#fbbf24}
+
+/* ---------- 开始遮罩 ---------- */
+#overlay{
+  position:absolute;inset:0;z-index:50;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(1200px 800px at 50% 30%,rgba(79,70,229,.25),transparent 60%),rgba(15,23,42,.82);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  transition:opacity .5s;
+}
+#overlay.hide{opacity:0;pointer-events:none}
+.ov-box{text-align:center;padding:32px 26px;max-width:480px}
+.ov-emoji{font-size:64px;margin-bottom:8px;animation:float 3s ease-in-out infinite}
+.ov-box h1{font-size:clamp(34px,7vw,52px);letter-spacing:2px;margin-bottom:10px}
+.ov-lead{font-size:clamp(15px,2.6vw,18px);color:#cbd5e1;margin-bottom:22px}
+.ov-tips{text-align:left;display:inline-block;margin:0 auto 26px;font-size:14px;color:#94a3b8;line-height:2.1}
+#btnStart{
+  border:none;cursor:pointer;font-family:inherit;font-size:18px;font-weight:800;color:#fff;
+  background:linear-gradient(135deg,#16a34a,#059669);padding:15px 46px;border-radius:99px;
+  box-shadow:0 12px 30px rgba(5,150,105,.4);transition:.2s transform;
+}
+#btnStart:active{transform:scale(.96)}
+.ov-note{font-size:12px;color:#64748b;margin-top:14px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:600px){
+  .brand{font-size:17px}
+  .brand .sub{display:none}
+  .chip{font-size:12px;padding:7px 11px}
+  #score-panel{gap:6px;top:calc(52px + env(safe-area-inset-top))}
+  .score-item{padding:6px 10px;min-width:60px;border-radius:11px}
+  .s-val{font-size:17px}
+  .s-val.big{font-size:20px}
+  #gauge{height:130px;width:12px;right:10px}
+  #hint{font-size:12px}
+}
