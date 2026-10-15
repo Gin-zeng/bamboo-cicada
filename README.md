@@ -1,116 +1,118 @@
-# 竹知了 · 3D 仿真游戏 🎋
+# Bamboo Cicada · 3D Simulation Game 🎋
 
-> Bamboo Cicada — 一个把中国传统竹制玩具「竹知了」搬进浏览器的 3D 交互式仿真游戏。
+> A browser-based 3D interactive simulation of **「竹知了」(Bamboo Cicada)**, a traditional Chinese bamboo toy.
 
-「竹知了」是一根竹签串着一片薄竹片的老玩具：用手搓动竹签，竹片高速旋转切割空气，发出类似夏天蝉鸣的「哇呜——哇呜——」声。转得越快、音调越高；转速慢下来，声音也跟着变闷变低，直到停下。
+**English** | [中文文档](README.zh-CN.md)
 
-这个项目用 **Three.js + Web Audio API + MediaPipe Hands** 在浏览器里还原了这一整套体验——**无构建步骤、无后端、纯静态**，打开即玩。
+A "Bamboo Cicada" is an old toy made of a bamboo stick with a thin bamboo blade threaded onto it. Rub the stick between your hands to spin the blade at high speed — the blade cuts through the air and vibrates, producing a *"wa-wu, wa-wu"* sound just like summer cicadas. The faster it spins, the higher the pitch; as it slows down, the sound gets deeper and duller until it stops.
+
+This project recreates the whole experience in the browser using **Three.js + Web Audio API + MediaPipe Hands** — **no build step, no backend, purely static**, just open and play.
 
 <p align="center">
-  <img src="assets/screenshot-desktop.png" alt="桌面端" width="65%">
-  <img src="assets/screenshot-mobile.png" alt="移动端" width="24%">
+  <img src="assets/screenshot-desktop.png" alt="Desktop" width="65%">
+  <img src="assets/screenshot-mobile.png" alt="Mobile" width="24%">
 </p>
 
 ---
 
-## ✨ 功能特性
+## ✨ Features
 
-- 🎋 **立体竹制质感**：竹签 + 竹片 + 竹节建模，金黄竹色材质，方向光/边缘光塑造立体感，支持鼠标拖拽旋转视角。
-- 🌀 **真实旋转物理**：搓动给竹片一个角速度，之后受空气阻力（线性 + 二次阻力）自然衰减，转速越高衰减越快。
-- 🔊 **Web Audio 实时合成蝉鸣**：**不使用任何预录音频**，音调与响度随转速连续变化，转速归零声音自然消失。
-- 👻 **运动残影**：7 层半透明竹片副本随转速展开/收拢，直观感受「快 → 慢」。
-- 🖐️ **多端交互**：鼠标拖拽 / 手机触摸 / 摇一摇（DeviceMotion）/ 摄像头手势（MediaPipe Hands）。
-- 🏆 **挑战计分**：连续鸣叫时长、实时得分、最高转速与最好成绩（localStorage 持久化）。
+- 🎋 **3D bamboo texture**: stick + blade + nodes modeled with a golden bamboo color, directional/rim lighting for depth, drag-to-rotate camera.
+- 🌀 **Realistic spinning physics**: rubbing gives the blade angular velocity, which then decays naturally under air drag (linear + quadratic).
+- 🔊 **Real-time cicada synthesis via Web Audio**: **no pre-recorded audio** — pitch and loudness follow the spin speed continuously and fade out naturally as it stops.
+- 👻 **Motion trail**: 7 semi-transparent blade copies fan out / collapse with speed, making deceleration visually obvious.
+- 🖐️ **Multi-input**: mouse drag / touch / shake (DeviceMotion) / camera gesture (MediaPipe Hands).
+- 🏆 **Challenge scoring**: continuous chirp duration, live score, top speed and best records (persisted in `localStorage`).
 
-## 🎮 玩法
+## 🎮 How to play
 
-1. 点击「开始玩」。
-2. **搓动竹签**：桌面端按住竹片/竹签来回拖动；手机端单指搓动，或直接「摇一摇」手机；也可开启摄像头，对着镜头来回搓动手掌。
-3. 竹片转起来后，听音调随转速变化；松开后转速自然衰减、蝉鸣渐弱直到停。
-4. 挑战目标：**让竹知了持续鸣叫更久、冲到更高转速**，冲击你的最好纪录。
+1. Click **开始玩 (Start)**.
+2. **Rub the stick**: on desktop, press and drag back and forth on the blade/stick; on mobile, rub with one finger or just **shake** the phone; or enable the camera and rub your palms in front of the lens.
+3. Once the blade spins, listen to the pitch change with speed; release and it decays naturally until it stops.
+4. Challenge: **keep it chirping longer and reach a higher speed** to beat your own records.
 
-## 🛠 技术栈
+## 🛠 Tech stack
 
-| 技术 | 用途 |
+| Technology | Purpose |
 | --- | --- |
-| [Three.js r128](https://threejs.org/) | 3D 场景渲染、光照、阴影 |
-| Web Audio API | 蝉鸣实时合成（锯齿波载波 + LFO 脉冲调制） |
-| [MediaPipe Hands](https://developers.google.com/mediapipe) | 摄像头手势识别（按需加载） |
-| 原生 JavaScript | 物理模拟、交互、计分（无构建工具、无框架） |
+| [Three.js r128](https://threejs.org/) | 3D rendering, lighting, shadows |
+| Web Audio API | Real-time cicada synthesis (sawtooth carrier + LFO pulse modulation) |
+| [MediaPipe Hands](https://developers.google.com/mediapipe) | Camera hand-gesture recognition (lazy-loaded) |
+| Vanilla JavaScript | Physics, interaction, scoring (no build tool, no framework) |
 
-## 📐 技术细节
+## 📐 Technical details
 
-### 1. 旋转物理
+### 1. Spinning physics
 
-竹片绕竹签轴旋转，状态量为角度 `θ` 与角速度 `ω`。搓动输入直接映射目标转速，松开后进入自由衰减：
+The blade rotates around the stick axis, with state `θ` (angle) and `ω` (angular velocity). Rubbing maps directly to a target speed; on release it decays freely:
 
 ```
-dω/dt = -k1·ω - k2·ω·|ω|        （空气阻力：线性 + 二次）
+dω/dt = -k1·ω - k2·ω·|ω|        (air drag: linear + quadratic)
 θ += ω·dt
 ```
 
-- 线性项 `k1 = 0.02`（空气黏性，低速主导）
-- 二次项 `k2 = 0.012`（压力阻力，高速更明显，让满速约 8~12 秒自然停下）
+- Linear term `k1 = 0.02` (air viscosity, dominates at low speed)
+- Quadratic term `k2 = 0.012` (pressure drag, stronger at high speed, bringing full speed to a stop in ~8–12 s)
 
-搓动映射：`ω_target = 搓动速度 × 0.22`（夹在 `[0, MAX_OMEGA]`），用指数平滑逼近，保证「跟手」。
+Rubbing mapping: `ω_target = rubbing speed × 0.22` (clamped to `[0, MAX_OMEGA]`), approached with exponential smoothing for a responsive feel.
 
-### 2. 蝉鸣合成（Web Audio）
+### 2. Cicada synthesis (Web Audio)
 
-所有声音实时合成，节点链路：
+All sound is synthesized in real time. Node graph:
 
 ```
 osc1(sawtooth, fCarrier) ─┐
 osc2(sawtooth, detune+6)  ─┴→ bandpass filter → masterGain → destination
-lfo(sine, fPulse) → lfoGain ─→ masterGain.gain  （幅度调制）
+lfo(sine, fPulse) → lfoGain ─→ masterGain.gain  (amplitude modulation)
 ```
 
-设归一化转速 `n = ω / ω_max ∈ [0,1]`，三个关键参数随 `n` 连续变化：
+Let normalized speed `n = ω / ω_max ∈ [0,1]`. Three key parameters vary continuously with `n`:
 
-| 参数 | 公式 | 效果 |
+| Parameter | Formula | Effect |
 | --- | --- | --- |
-| 载波频率 `fCarrier` | `150 + n × 1150` Hz | 音调随转速升高（150 → 1300 Hz） |
-| 脉冲频率 `fPulse` | `2.5 + n × 27` Hz | 「哇呜哇呜」节律随转速变密 |
-| 总增益 `gain` | `n^1.6 × 0.34` | 响度随转速增大，转速 0 时静音 |
+| Carrier `fCarrier` | `150 + n × 1150` Hz | pitch rises with speed (150 → 1300 Hz) |
+| Pulse `fPulse` | `2.5 + n × 27` Hz | the "wa-wu" rhythm densifies with speed |
+| Master `gain` | `n^1.6 × 0.34` | loudness grows with speed, silent at 0 |
 
-`fPulse` 对应真实竹知了的**叶片通过频率**——竹片每转过一圈切割一次空气，转速越高「哇呜」越密集，这也正是蝉鸣那种周期性起伏的来源。所有参数用 `setTargetAtTime` 平滑过渡，避免爆音。
+`fPulse` corresponds to the real toy's **blade passing frequency** — the blade cuts the air once per revolution, so faster spinning means denser "wa-wu" pulses, which is exactly where the cicada-like periodic rise-and-fall comes from. All parameters are smoothed with `setTargetAtTime` to avoid clicks.
 
-### 3. 运动残影
+### 3. Motion trail
 
-主竹片之外，额外渲染 7 个共享几何体的半透明副本，每个副本绕轴滞后一个角度：
+Beyond the main blade, 7 semi-transparent copies share the same geometry, each lagging behind by an angle:
 
 ```
 trailAngle = 0.04 + n × 0.55 rad
 opacity_i  = max(0, 0.42·n - i·0.045)
 ```
 
-转速高时残影沿圆周展开成扇形/圆盘；转速下降时残影收拢并淡出，露出单个竹片——让「减速」一目了然。
+At high speed the trail fans out into a sector/disk; as speed drops it collapses and fades, revealing the single blade — making deceleration immediately visible.
 
-### 4. 摄像头手势（MediaPipe Hands）
+### 4. Camera gesture (MediaPipe Hands)
 
-点击「📷 手势」后动态加载 MediaPipe（模型约 10MB，走 CDN），获取单只手 21 个关键点。取掌根/指根平均作为手掌中心，计算其在水平方向的运动速度：
+Clicking **📷 手势 (Gesture)** lazily loads MediaPipe (~10 MB model via CDN) and gets 21 hand landmarks. The palm center (average of palm/knuckle roots) is tracked; its horizontal velocity drives the spin:
 
 ```
 handSpeed = |dx/dt| × 2600
-搓动判定：handSpeed > 阈值  →  驱动竹片旋转
+rub detection: handSpeed > threshold  →  spin the blade
 ```
 
-识别结果以绿色骨架实时叠加在右下角画中画上，画中画整体 `scaleX(-1)` 做自拍镜像，保证画面与关键点对齐。
+The result is drawn as a green skeleton overlaid on a bottom-right picture-in-picture, which is mirrored with `scaleX(-1)` for a selfie view, keeping the overlay aligned with the image.
 
-### 5. 挑战计分
+### 5. Challenge scoring
 
-- 转速 > `140 rpm` 视为「鸣叫中」，开始累计连续鸣叫时长。
-- 得分 = 对归一化转速积分（鸣叫期间累加）。
-- 最好成绩（最长连续鸣叫、最高转速）写入 `localStorage`，跨会话保留。
+- Speed > `140 rpm` counts as "chirping"; continuous chirp duration accumulates.
+- Score integrates normalized speed during chirping.
+- Best records (longest continuous chirp, top speed) are stored in `localStorage`.
 
-## 🤖 生成提示词（Prompt）
+## 🤖 Prompts used to generate this project
 
-本项目完全由 AI 编程助手根据自然语言提示词生成。完整生成过程如下：
+This project was generated entirely by an AI coding assistant from natural-language prompts. The original prompts (in Chinese) are reproduced below for reference:
 
-**① 初始需求**
+**① Initial request**
 
 > 帮我做一个 3D 版的「竹知了」传统玩具的仿真网页游戏，响应式多端兼容。
 
-**② 细化技术方案**
+**② Detailed technical spec**
 
 > 竹知了式中国传统的竹制玩具，一根竹签上串着一片薄竹片，用手搓动竹签让竹片高速旋转，竹片切割空气产生振动，发出类似夏天蝉鸣的「哇呜——哇呜——」声。转得越快、音调越高；转速慢下来，声音也跟着变闷变低，直到停下。请先联网搜索了解竹知了的构造，发声原理和真实的声音特征，确保仿真的物理和声音尽量接近真实。核心要求：
 > 1. 用 Three.js 做 3D 渲染，竹知了要有立体竹制质感，支持旋转视角观察。
@@ -121,54 +123,55 @@ handSpeed = |dx/dt| × 2600
 > 6. 画面上要能明显看出竹片在高速旋转，用运动模糊或残影效果让人直观感受转速变化。
 > 7. 加一个可玩挑战玩法（连续鸣叫时长 / 最高转速），实时计分并记录最好成绩。
 
-**③ 迭代：显示摄像头画面**
+**③ Iteration: show camera feed**
 
 > 显示摄像头画面
 
-**④ 开源与部署**
+**④ Open source & deploy**
 
 > 帮我部署到我的 GitHub 仓库并开源，整理开源文件，制作 README 介绍项目提示词和技术细节。
 
-## 🚀 本地运行
+## 🚀 Run locally
 
-纯静态，无需安装依赖：
+Pure static, no dependencies to install:
 
 ```bash
-# 方式一：直接用任意静态服务器
-python -m http.server 8000        # 然后访问 http://localhost:8000
+# Option 1: any static server
+python -m http.server 8000        # then open http://localhost:8000
 
-# 方式二：直接双击 index.html（也能玩）
+# Option 2: just double-click index.html
 ```
 
-> 摄像头手势需要 HTTPS 或 localhost 环境（`getUserMedia` 安全上下文要求），`file://` 或非本机 HTTP 下会不可用；其余玩法不受影响。
+> Camera gestures require HTTPS or localhost (`getUserMedia` secure-context requirement); they won't work under `file://` or non-local HTTP. All other features are unaffected.
 
-## 🌐 部署到 GitHub Pages
+## 🌐 Deploy to GitHub Pages
 
-1. 把本仓库推送到 GitHub。
-2. 进入仓库 **Settings → Pages**。
-3. **Source** 选择 `Deploy from a branch`，分支选 `main`，目录选 `/ (root)`。
-4. 保存后稍等片刻，访问 `https://<你的用户名>.github.io/<仓库名>/` 即可在线游玩。
+1. Push this repo to GitHub.
+2. Go to **Settings → Pages**.
+3. Set **Source** to `Deploy from a branch`, branch `main`, folder `/ (root)`.
+4. Save and wait a moment, then visit `https://<your-username>.github.io/<repo>/`.
 
-（也可以把上面这段配置成 GitHub Actions 自动部署，本项目为纯静态站，无需构建步骤。）
+(You can also turn this into a GitHub Actions workflow — the site is purely static with no build step.)
 
-## 📁 目录结构
+## 📁 Project structure
 
 ```
 .
-├── index.html            # 页面结构 + 游戏 UI
-├── style.css             # 响应式样式
-├── app.js                # 3D / 物理 / 声音 / 交互核心逻辑
+├── index.html            # page structure + game UI
+├── style.css             # responsive styles
+├── app.js                # 3D / physics / audio / interaction core
 ├── vendor/
-│   ├── three.min.js      # Three.js r128（第三方，MIT）
-│   ├── OrbitControls.js  # 相机控制（第三方，MIT）
-│   └── THREE-LICENSE.md  # 第三方库许可声明
-├── assets/               # README 用演示截图
-├── LICENSE               # 本项目 MIT 许可
-└── README.md
+│   ├── three.min.js      # Three.js r128 (third-party, MIT)
+│   ├── OrbitControls.js  # camera controls (third-party, MIT)
+│   └── THREE-LICENSE.md  # third-party license notice
+├── assets/               # README screenshots
+├── LICENSE               # this project's MIT license
+├── README.md             # English README (this file)
+└── README.zh-CN.md       # Chinese README
 ```
 
-## 📄 许可证
+## 📄 License
 
-本项目采用 [MIT License](LICENSE)。
+This project is licensed under the [MIT License](LICENSE).
 
-第三方库 `vendor/` 目录下的 Three.js 与 OrbitControls 版权归 [three.js authors](https://github.com/mrdoob/three.js) 所有，详见 [vendor/THREE-LICENSE.md](vendor/THREE-LICENSE.md)。
+The Three.js and OrbitControls files under `vendor/` are © [three.js authors](https://github.com/mrdoob/three.js), see [vendor/THREE-LICENSE.md](vendor/THREE-LICENSE.md).
